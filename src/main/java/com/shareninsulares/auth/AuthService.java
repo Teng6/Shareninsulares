@@ -11,8 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.nio.channels.IllegalChannelGroupException;
-
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -26,7 +24,7 @@ public class AuthService {
             throw new IllegalArgumentException("Email already registered");
         }
         if(userRepository.existsByStudentId(request.getStudentId())){
-            throw new IllegalArgumentException("Student ID already registed");
+            throw new IllegalArgumentException("Student ID already registered");
         }
 
         User user = User.builder()
@@ -40,17 +38,33 @@ public class AuthService {
         userRepository.save(user);
 
         String token = jwtUtil.generateToken(user.getEmail());
-        return new AuthResponse(token,user.getEmail(), user.getFullName(), user.getRole());
+        return new AuthResponse(
+                token,
+                user.getId(),
+                user.getStudentId(),
+                user.getEmail(),
+                user.getFullName(),
+                user.getCampus(),
+                user.getRole()
+        );
     }
 
     public AuthResponse login(LoginRequest request){
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("Invalid email"));
+        User user = userRepository.findByStudentId(request.getStudentId())
+                .orElseThrow(() -> new IllegalArgumentException("Invalid student ID"));
         if(!passwordEncoder.matches(request.getPassword(), user.getPassword())){
             throw new IllegalArgumentException("Invalid password");
         }
 
         String token = jwtUtil.generateToken(user.getEmail());
-        return new AuthResponse(token, user.getEmail(), user.getFullName(), user.getRole());
+        return new AuthResponse(
+                token,
+                user.getId(),
+                user.getStudentId(),
+                user.getEmail(),
+                user.getFullName(),
+                user.getCampus(),
+                user.getRole()
+        );
     }
 }
