@@ -42,6 +42,7 @@ public class BookingService {
         Booking booking = Booking.builder()
                 .listing(listing)
                 .buyer(buyer)
+                .status(BookingStatus.PENDING)
                 .message(request.getMessage())
                 .build();
 
@@ -90,9 +91,9 @@ public class BookingService {
     public BookingResponse complete(Long id, User seller){
         Booking booking = getOrThrow(id);
         assertSeller(booking, seller);
-        assertStatus(booking, BookingStatus.PENDING);
+        assertStatus(booking, BookingStatus.ACCEPTED);
 
-        booking.setStatus(BookingStatus.PENDING);
+        booking.setStatus(BookingStatus.COMPLETED);
         booking.setUpdatedAt(LocalDateTime.now());
 
         Listing listing = booking.getListing();
